@@ -52,7 +52,18 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
     get() = auth.currentUser?.isAnonymous
 
   override val GetType: String?
-    get() = auth.currentUser?.providerData?.first()?.providerId //погуглить про провайдера
+    get() {
+      var res = auth.currentUser?.providerData?.first()?.providerId
+      val subres = auth.currentUser?.providerData
+      if (subres != null) {
+        for (user in subres) {
+          if (user.providerId == "google.com")
+            res = user.providerId
+        }
+
+      }
+      return res
+    }//auth.currentUser?.providerData?.first()?.providerId //погуглить про провайдера
 
   override suspend fun authenticate(email: String, password: String) {
     auth.signInWithEmailAndPassword(email, password).await()

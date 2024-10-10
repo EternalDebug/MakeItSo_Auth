@@ -16,14 +16,28 @@ limitations under the License.
 
 package com.example.makeitso.screens.login
 
+import android.app.Activity
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.common.composable.*
@@ -38,12 +52,14 @@ fun LoginScreen(
   viewModel: LoginViewModel = hiltViewModel()
 ) {
   val uiState by viewModel.uiState
+  val context = LocalContext.current as Activity
 
   LoginScreenContent(
     uiState = uiState,
     onEmailChange = viewModel::onEmailChange,
     onPasswordChange = viewModel::onPasswordChange,
     onSignInClick = { viewModel.onSignInClick(openAndPopUp) },
+    onSignInGoogleClick = { viewModel.handleGoogleSignIn(context, openAndPopUp) },
     onForgotPasswordClick = viewModel::onForgotPasswordClick
   )
 }
@@ -55,6 +71,7 @@ fun LoginScreenContent(
   onEmailChange: (String) -> Unit,
   onPasswordChange: (String) -> Unit,
   onSignInClick: () -> Unit,
+  onSignInGoogleClick: () -> Unit,
   onForgotPasswordClick: () -> Unit
 ) {
   BasicToolbar(AppText.login_details)
@@ -71,6 +88,51 @@ fun LoginScreenContent(
     PasswordField(uiState.password, onPasswordChange, Modifier.fieldModifier())
 
     BasicButton(AppText.sign_in, Modifier.basicButton()) { onSignInClick() }
+    val isDarkTheme = isSystemInDarkTheme()
+    //BasicButton(AppText.sign_in_google, Modifier.basicButton()) { onSignInGoogleClick() }
+    Box(
+      contentAlignment = Alignment.Center,
+      //modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerHigh)
+    ) {
+      Surface(
+        shape = CircleShape,
+        color = when (isDarkTheme) {
+          true -> Color(0xFF131314)
+          false -> Color(0xFFFFFFFF)
+        },
+        modifier = Modifier
+          .height(50.dp)
+          .width(260.dp)
+          .clip(CircleShape)
+          .border(
+            BorderStroke(
+              width = 1.dp,
+              color = when (isDarkTheme) {
+                true -> Color(0xFF8E918F)
+                false -> Color.Transparent
+              }
+            ),
+            shape = CircleShape
+          )
+          .clickable { onSignInGoogleClick() }
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          modifier = Modifier.padding(vertical = 5.dp)
+        ) {
+          Spacer(modifier = Modifier.width(14.dp))
+          Image(
+            painterResource(id = com.example.makeitso.R.drawable.google_logo),
+            contentDescription = null,
+            modifier = Modifier.padding(vertical = 5.dp)
+          )
+          Spacer(modifier = Modifier.weight(1f))
+          Text(text = "Continue with Google")
+          Spacer(modifier = Modifier.weight(1f))
+        }
+      }
+
+    }
 
     BasicTextButton(AppText.forgot_password, Modifier.textButton()) {
       onForgotPasswordClick()
@@ -91,7 +153,61 @@ fun LoginScreenPreview() {
       onEmailChange = { },
       onPasswordChange = { },
       onSignInClick = { },
+      onSignInGoogleClick =  { },
       onForgotPasswordClick = { }
     )
+  }
+}
+
+@Composable
+fun LoginGoogleScreen(openAndPopUp: (String, String) -> Unit,
+  viewModel: LoginViewModel = hiltViewModel()
+) {
+  val isDarkTheme = isSystemInDarkTheme()
+  val context = LocalContext.current as Activity
+  val onClick = { viewModel.handleGoogleSignIn(context, openAndPopUp )  }
+
+  Box(
+    contentAlignment = Alignment.Center,
+    //modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainerHigh)
+  ) {
+    Surface(
+      shape = CircleShape,
+      color = when (isDarkTheme) {
+        true -> Color(0xFF131314)
+        false -> Color(0xFFFFFFFF)
+      },
+      modifier = Modifier
+        .height(50.dp)
+        .width(260.dp)
+        .clip(CircleShape)
+        .border(
+          BorderStroke(
+            width = 1.dp,
+            color = when (isDarkTheme) {
+              true -> Color(0xFF8E918F)
+              false -> Color.Transparent
+            }
+          ),
+          shape = CircleShape
+        )
+        .clickable { onClick() }
+    ) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 5.dp)
+      ) {
+        Spacer(modifier = Modifier.width(14.dp))
+        Image(
+          painterResource(id = com.example.makeitso.R.drawable.google_logo),
+          contentDescription = null,
+          modifier = Modifier.padding(vertical = 5.dp)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Text(text = "Continue with Google")
+        Spacer(modifier = Modifier.weight(1f))
+      }
+    }
+
   }
 }
